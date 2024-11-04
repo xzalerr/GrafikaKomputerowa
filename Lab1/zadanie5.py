@@ -15,7 +15,6 @@ def startup():
 def shutdown():
     pass
 
-
 def draw_rectangle(x, y, a, b):
     glBegin(GL_TRIANGLES)
     glVertex2f(x - a / 2, y - b / 2)
@@ -31,28 +30,34 @@ def draw_rectangle(x, y, a, b):
 
     glFlush()
 
+def draw_triangle(x1, y1, x2, y2, x3, y3):
+    glBegin(GL_TRIANGLES)
+    glVertex2f(x1, y1)
+    glVertex2f(x2, y2)
+    glVertex2f(x3, y3)
+    glEnd()
 
-def sierpinski_carpet(x, y, width, height, depth):
+    glFlush()
+
+
+def sierpinski_triangle(p1, p2, p3, depth):
     if depth == 0:
-        glColor3f(0.0, 0.0, 0.25)
-        draw_rectangle(x, y, width, height)
+        glColor3f(0.0, 1.0, 0.5)
+        draw_triangle(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1])
     else:
-        glColor3f(0.0, 0.0, 0.25)
-        draw_rectangle(x, y, width, height)
+        mid12 = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2]
+        mid23 = [(p2[0] + p3[0]) / 2, (p2[1] + p3[1]) / 2]
+        mid31 = [(p3[0] + p1[0]) / 2, (p3[1] + p1[1]) / 2]
 
-        glColor3f(0.5, 0, 0)
-        draw_rectangle(x, y, width/3, height/3)
-
-        small_w, small_h = width/3, height/3
-        for small_x in [-small_w, 0, small_w]:
-            for small_y in [-small_h, 0, small_h]:
-                if small_x != 0 or small_y != 0:
-                    sierpinski_carpet(x+small_x, y+small_y, small_w, small_h, depth-1)
-
+        sierpinski_triangle(p1, mid12, mid31, depth - 1)
+        sierpinski_triangle(mid12, p2, mid23, depth - 1)
+        sierpinski_triangle(mid31, mid23, p3, depth - 1)
 
 def render(time, depth):
     glClear(GL_COLOR_BUFFER_BIT)
-    sierpinski_carpet(0, 0, 200, 200, depth)
+    glColor3f(0.2, 0.3, 0.6)
+    draw_rectangle(0, 0, 200, 200)
+    sierpinski_triangle([-100, -75], [100, -75], [0, 100], depth)
     glFlush()
 
 
