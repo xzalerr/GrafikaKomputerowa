@@ -53,18 +53,35 @@ def egg_points(N):
 
     return tab
 
+
 def draw_egg(N):
-    random.seed(8)
     vertexes = egg_points(N)
+    colors = np.zeros((N, N, 3))
+
+    for i in range(N):
+        for j in range(N):
+            if i < N // 2:
+                r_color = i / N
+                g_color = j / N
+                b_color = 1
+            else:
+                r_color = (N - 1 - i) / N
+                g_color = (N - 1 - j) / N
+                b_color = 1
+
+            colors[i, j] = [r_color, g_color, b_color]
 
     for i in range(N - 1):
         glBegin(GL_TRIANGLE_STRIP)
         for j in range(N):
-            glColor3f(random.random(), random.random(), random.random())
+            r_color, g_color, b_color = colors[i, j]
+            glColor3f(r_color, g_color, b_color)
             glVertex3fv(vertexes[i][j])
 
-            glColor3f(random.random(), random.random(), random.random())
-            glVertex3fv(vertexes[i+1][j])
+            r_color, g_color, b_color = colors[i + 1, j]
+            glColor3f(r_color, g_color, b_color)
+            glVertex3fv(vertexes[i + 1][j])
+
         glEnd()
 
 
