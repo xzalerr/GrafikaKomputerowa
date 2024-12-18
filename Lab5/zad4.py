@@ -32,6 +32,10 @@ att_constant = 1.0
 att_linear = 0.05
 att_quadratic = 0.001
 
+walls = [True, True, True, True] # widocznosc scian
+
+textures = [] # zaladowane tekstury
+current_texture = 0 # indeks altualnej tekstury
 
 def startup():
     update_viewport(None, 400, 400)
@@ -62,16 +66,91 @@ def startup():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
-    image = Image.open("../../../Downloads/lab-6/tekstura.tga")
+    add_texture("tekstura.tga")
+    add_texture("teksturawlasna.tga")
 
+    choose_texture()
+
+
+def shutdown():
+    pass
+
+
+def add_texture(path):
+    textures.append(Image.open(path))
+
+
+def choose_texture():
+    global current_texture
+    image = textures[current_texture]
     glTexImage2D(
         GL_TEXTURE_2D, 0, 3, image.size[0], image.size[1], 0,
         GL_RGB, GL_UNSIGNED_BYTE, image.tobytes("raw", "RGB", 0, -1)
     )
 
 
-def shutdown():
-    pass
+def render_triangles():
+    global walls
+
+    square_cords = [
+        [-5.0, -5.0, 0.0],
+        [5.0, -5.0, 0.0],
+        [5.0, 5.0, 0.0],
+        [-5.0, 5.0, 0.0]
+    ]
+    top_vertex = [0.0, 0.0, 5.0]
+
+    glBegin(GL_TRIANGLES)
+    glTexCoord2f(0.0, 0.0)
+    glVertex3f(-5.0, -5.0, 0.0)
+    glTexCoord2f(1.0, 0.0)
+    glVertex3f(5.0, -5.0, 0.0)
+    glTexCoord2f(1.0, 1.0)
+    glVertex3f(5.0, 5.0, 0.0)
+
+    glTexCoord2f(0.0, 1.0)
+    glVertex3f(-5.0, 5.0, 0.0)
+    glTexCoord2f(0.0, 0.0)
+    glVertex3f(-5.0, -5.0, 0.0)
+    glTexCoord2f(1.0, 1.0)
+    glVertex3f(5.0, 5.0, 0.0)
+
+    walls_vertices = [
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 0)
+    ]
+
+    texture_coords = [
+        [(0.0, 0.0),  
+        (1.0, 0.0), 
+        (0.5, 0.5)], 
+        [(1.0, 0.0),  
+        (1.0, 1.0),  
+        (0.5, 0.5)], 
+        [(1.0, 1.0),  
+        (0.0, 1.0),
+        (0.5, 0.5)],
+        [(0.0, 1.0),
+        (0.0, 0.0),
+        (0.5, 0.5)]
+    ]
+
+    count = 0
+
+    for i, (start, end) in enumerate(walls_vertices):
+        if walls[i]:
+            glTexCoord2f(*texture_coords[i][count])
+            count = (count + 1) % 3
+            glVertex3f(*square_cords[start])
+            glTexCoord2f(*texture_coords[i][count])
+            count = (count + 1) % 3
+            glVertex3f(*square_cords[end])
+            glTexCoord2f(*texture_coords[i][count])
+            count = (count + 1) % 3
+            glVertex3f(*top_vertex)
+
 
 
 def render(time):
@@ -87,14 +166,7 @@ def render(time):
         theta += delta_x * pix2angle
 
     glRotatef(theta, 0.0, 1.0, 0.0)
-
-    glBegin(GL_TRIANGLES)
-    glTexCoord2f(0.0, 0.0)
-    glVertex3f(-5.0, -5.0, 0.0)
-    glTexCoord2f(1.0, 0.0)
-    glVertex3f(5.0, -5.0, 0.0)
-    glTexCoord2f(0.5, 1.0)
-    glVertex3f(0.0, 5.0, 0.0)
+    render_triangles()
     glEnd()
 
     glFlush()
@@ -119,8 +191,15 @@ def update_viewport(window, width, height):
 
 
 def keyboard_key_callback(window, key, scancode, action, mods):
+    global walls, current_texture
     if key == GLFW_KEY_ESCAPE and action == GLFW_PRESS:
         glfwSetWindowShouldClose(window, GLFW_TRUE)
+    if key in [GLFW_KEY_1, GLFW_KEY_2, GLFW_KEY_3, GLFW_KEY_4] and action == GLFW_PRESS:
+        i = key - GLFW_KEY_1
+        walls[i] = not walls[i]
+    if key == GLFW_KEY_SPACE and action == GLFW_PRESS:
+        current_texture = (current_texture + 1) % len(textures)
+        choose_texture()
 
 
 def mouse_motion_callback(window, x_pos, y_pos):

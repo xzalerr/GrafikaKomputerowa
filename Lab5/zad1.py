@@ -62,7 +62,7 @@ def startup():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
-    image = Image.open("../../../Downloads/lab-6/tekstura.tga")
+    image = Image.open("tekstura.tga")
 
     glTexImage2D(
         GL_TEXTURE_2D, 0, 3, image.size[0], image.size[1], 0,
@@ -93,8 +93,16 @@ def render(time):
     glVertex3f(-5.0, -5.0, 0.0)
     glTexCoord2f(1.0, 0.0)
     glVertex3f(5.0, -5.0, 0.0)
-    glTexCoord2f(0.5, 1.0)
-    glVertex3f(0.0, 5.0, 0.0)
+    glTexCoord2f(1.0, 1.0)
+    glVertex3f(5.0, 5.0, 0.0)
+
+    glTexCoord2f(0.0, 1.0)
+    glVertex3f(-5.0, 5.0, 0.0)
+    glTexCoord2f(0.0, 0.0)
+    glVertex3f(-5.0, -5.0, 0.0)
+    glTexCoord2f(1.0, 1.0)
+    glVertex3f(5.0, 5.0, 0.0)
+
     glEnd()
 
     glFlush()
